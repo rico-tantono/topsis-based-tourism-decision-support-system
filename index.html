@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matkul DecisionSupport & Geography information Systems
+</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ocean: { 950: '#0A2E38', 800: '#0D4A52', 700: '#10646D', 500: '#17919C', 200: '#BFE0DF', 100: '#E3F1F1' },
+          sunset: { 600: '#E2762A', 500: '#F2994A', 100: '#FCE9D2' },
+          sand: { 50: '#FAF6EE', 100: '#F2E9D8' },
+        },
+        fontFamily: {
+          display: ['"Playfair Display"', 'serif'],
+          sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-sand-50 font-sans text-ink antialiased">
+
+<!-- ================= HERO / HEADER ================= -->
+<header class="relative overflow-hidden">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1447372383289-37ce73050855?w=1600&auto=format&fit=crop&q=80&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8YmVhY2glMjB0b3VyaXNtJTIwc3Vuc2V0fGVufDB8fDB8fHww')"></div>
+  <div class="hero-overlay"></div>
+
+  <div class="relative z-10 mx-auto max-w-6xl px-5 sm:px-8">
+    <nav class="flex items-center justify-between pt-7 pb-16 sm:pb-24 text-white/90">
+      <div class="flex items-center gap-2.5">
+        <span class="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 backdrop-blur">
+          <svg viewBox="0 0 24 24" class="h-4.5 w-4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18c2-1.3 4-1.3 6 0s4 1.3 6 0 4-1.3 6 0M4 13 10 4l3 4.5L16 5l4 8"/></svg>
+        </span>
+        <span class="font-display text-lg tracking-tight">TUGAS 05</span>
+      </div>
+      <div class="hidden sm:flex items-center gap-7 text-sm font-medium">
+        <a href="#input" class="hover:text-white">Bobot Kriteria</a>
+        <a href="#proses" class="hover:text-white">Proses Perhitungan</a>
+        <a href="#hasil" class="hover:text-white">Hasil Akhir</a>
+      </div>
+    </nav>
+
+    <div class="max-w-2xl pb-28 sm:pb-36">
+      <span class="inline-block text-sunset-100 text-sm font-semibold mb-3">Sistem Pendukung Keputusan</span>
+      <h1 class="font-display text-[2.3rem] sm:text-5xl text-white leading-[1.15] mb-5">Menentukan Destinasi Wisata Terbaik dengan Metode TOPSIS</h1>
+      <p class="text-white/85 text-[15px] sm:text-base leading-relaxed max-w-xl">Tentukan destinasi wisata yang paling sesuai dengan mempertimbangkan biaya, fasilitas, akses, dan rating.</p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="#input" class="btn-primary">Atur Bobot Kriteria</a>
+        <a href="#hasil" class="btn-ghost-light">Lihat Hasil Akhir</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= MAIN ================= -->
+<main class="relative z-10 -mt-14 sm:-mt-20 mx-auto max-w-6xl px-5 sm:px-8 pb-24 space-y-16">
+
+  <!-- ============ INPUT: BOBOT KRITERIA & DATA DESTINASI ============ -->
+  <section id="input" class="scroll-mt-6 space-y-6">
+    <div class="section-head">
+      <span class="section-eyebrow">User Input</span>
+      <h2 class="font-display text-2xl sm:text-[28px] text-ocean-950">Atur Bobot Kriteria &amp; Data Destinasi</h2>
+      <p class="section-sub">Ubah kepentingan tiap kriteria, hasil di bawah akan otomatis terhitung ulang.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Bobot Kriteria</h3>
+        <p>Geser untuk mengubah tingkat kepentingan (skala 1&ndash;5). Bobot dinormalisasi otomatis agar preferensi akhir tetap 0&ndash;1.</p>
+      </div>
+      <div class="weight-grid" id="weight-grid"></div>
+      <p class="weight-total" id="weight-total-note"></p>
+    </div>
+
+    <div class="card">
+      <div class="card-head card-head-row">
+        <div>
+          <h3>Data Destinasi Wisata</h3>
+          <p>Nilai mentah tiap destinasi pada keempat kriteria &mdash; ini yang menjadi Matriks Keputusan (X).</p>
+        </div>
+        <button class="btn-primary" id="btn-add-dest" type="button">
+          <svg viewBox="0 0 16 16" class="h-3.5 w-3.5"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Tambah Destinasi
+        </button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="tbl-destinasi">
+          <thead>
+            <tr>
+              <th>Destinasi</th>
+              <th>Biaya Tiket Masuk</th>
+              <th>Fasilitas</th>
+              <th>Aksesibilitas Jalan</th>
+              <th>Rating/Popularitas</th>
+              <th class="th-actions">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-destinasi"></tbody>
+        </table>
+      </div>
+      <p class="empty-msg" id="empty-destinasi" hidden>Belum ada destinasi. Tambahkan destinasi pertama untuk mulai membandingkan.</p>
+    </div>
+  </section>
+
+  <!-- ============ PROSES: LANGKAH-LANGKAH TOPSIS ============ -->
+  <section id="proses" class="scroll-mt-6 space-y-6">
+    <div class="section-head">
+      <span class="section-eyebrow">System Process</span>
+      <h2 class="font-display text-2xl sm:text-[28px] text-ocean-950">Tahapan Perhitungan TOPSIS</h2>
+      <p class="section-sub">Lima langkah dari data mentah sampai jarak ke solusi ideal.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3><span class="step-num">1</span>Matriks Keputusan Awal (X)</h3>
+        <p>Nilai asli tiap destinasi pada tiap kriteria, langsung dari data di atas.</p>
+      </div>
+      <div class="table-wrap"><table class="data-table mono" id="tbl-x"><thead><tr></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3><span class="step-num">2</span>Matriks Ternormalisasi (R)</h3>
+        <p>r<sub>ij</sub> = x<sub>ij</sub> &divide; &radic;(&Sigma; x<sub>ij</sub><sup>2</sup>) &mdash; tiap nilai dibagi akar jumlah kuadrat kolomnya, sehingga satuan berbeda (rupiah, skor, rating) bisa dibandingkan.</p>
+      </div>
+      <div class="table-wrap"><table class="data-table mono" id="tbl-r"><thead><tr></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3><span class="step-num">3</span>Matriks Ternormalisasi Terbobot (Y)</h3>
+        <p>y<sub>ij</sub> = w<sub>j</sub> &times; r<sub>ij</sub> &mdash; matriks R dikalikan bobot ternormalisasi tiap kriteria.</p>
+      </div>
+      <div class="table-wrap"><table class="data-table mono" id="tbl-y"><thead><tr></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3><span class="step-num">4</span>Solusi Ideal Positif (A+) &amp; Negatif (A&minus;)</h3>
+        <p>Untuk kriteria <em>benefit</em>: A+ = nilai maksimum, A&minus; = nilai minimum pada kolom Y. Untuk kriteria <em>cost</em>: sebaliknya.</p>
+      </div>
+      <div class="table-wrap"><table class="data-table mono" id="tbl-ideal"><thead><tr></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3><span class="step-num">5</span>Jarak ke Solusi Ideal (D+ dan D&minus;)</h3>
+        <p>D<sub>i</sub><sup>+</sup> = &radic;&Sigma;(y<sub>ij</sub> &minus; A<sub>j</sub><sup>+</sup>)<sup>2</sup> &nbsp;&middot;&nbsp; D<sub>i</sub><sup>&minus;</sup> = &radic;&Sigma;(y<sub>ij</sub> &minus; A<sub>j</sub><sup>&minus;</sup>)<sup>2</sup> &mdash; jarak Euclidean tiap destinasi ke solusi ideal positif dan negatif.</p>
+      </div>
+      <div class="table-wrap"><table class="data-table mono" id="tbl-jarak"><thead><tr><th>Destinasi</th><th>D+</th><th>D&minus;</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ============ OUTPUT: HASIL PERANGKINGAN ============ -->
+  <section id="hasil" class="scroll-mt-6 space-y-6">
+    <div class="section-head">
+      <span class="section-eyebrow">Output</span>
+      <h2 class="font-display text-2xl sm:text-[28px] text-ocean-950">Hasil Akhir &amp; Peringkat Destinasi</h2>
+      <p class="section-sub">V<sub>i</sub> = D<sub>i</sub><sup>&minus;</sup> &divide; (D<sub>i</sub><sup>+</sup> + D<sub>i</sub><sup>&minus;</sup>) &mdash; destinasi dengan nilai preferensi tertinggi adalah yang paling dekat ke solusi ideal.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Grafik Nilai Preferensi (V)</h3></div>
+      <div class="chart-bars" id="chart-hasil"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Tabel Peringkat Akhir</h3></div>
+      <div class="table-wrap">
+        <table class="data-table" id="tbl-ranking">
+          <thead><tr><th>Ranking</th><th>Destinasi</th><th>D+</th><th>D&minus;</th><th>Nilai Preferensi (V)</th></tr></thead>
+          <tbody id="tbody-ranking"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="border-t border-sand-100 bg-white/60">
+  <div class="mx-auto max-w-6xl px-5 sm:px-8 py-8 text-sm text-ink-faint flex flex-col sm:flex-row items-center justify-between gap-2">
+    <span></span>
+  </div>
+</footer>
+
+<!-- MODAL: TAMBAH / EDIT DESTINASI -->
+<div class="modal-backdrop" id="modal-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head">
+      <h3 id="modal-title">Tambah Destinasi</h3>
+      <button class="icon-btn" id="modal-close" aria-label="Tutup">
+        <svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <form id="form-destinasi" class="modal-body">
+      <input type="hidden" id="f-id">
+      <label class="field">
+        <span>Nama Destinasi</span>
+        <input type="text" id="f-nama" placeholder="cth. Pantai Kuta, Bali" autocomplete="off">
+      </label>
+      <div class="field-grid">
+        <label class="field">
+          <span>Biaya Tiket Masuk (Rp)</span>
+          <input type="number" id="f-tiket" min="0" step="1000" placeholder="cth. 25000">
+        </label>
+        <label class="field">
+          <span>Fasilitas (0&ndash;100)</span>
+          <input type="number" id="f-fasilitas" min="0" max="100" step="1" placeholder="cth. 80">
+        </label>
+        <label class="field">
+          <span>Aksesibilitas Jalan (0&ndash;100)</span>
+          <input type="number" id="f-akses" min="0" max="100" step="1" placeholder="cth. 75">
+        </label>
+        <label class="field">
+          <span>Rating/Popularitas (0&ndash;5)</span>
+          <input type="number" id="f-rating" min="0" max="5" step="0.1" placeholder="cth. 4.5">
+        </label>
+      </div>
+      <p class="form-error" id="form-error" hidden></p>
+    </form>
+    <div class="modal-foot">
+      <button class="btn-ghost" id="modal-cancel" type="button">Batal</button>
+      <button class="btn-primary" id="modal-save" type="button">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="script.js"></script>
+</body>
+</html>
